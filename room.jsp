@@ -1,59 +1,39 @@
-<%@ include file="includes/header.jsp" %>
-<%@ page import= "java.util.*" %>
 <%@ page import= "Model.*" %>
+<%@ page import= "java.util.*" %>
+
 <%
-	Room roomDetails = new Room();
-	String roomLabel = "Save";
-	int room_id = Integer.parseInt(request.getParameter ("room_id"));
-	if(room_id != 0) {
-		roomLabel = "Update";
+	Room roomObj = new Room();
+	String emp_id = "0";
+	if(session.getAttribute("login_level") != null && session.getAttribute("login_level").equals("3")) {
+		emp_id = (String) session.getAttribute("login_emp_id");
 	}
-	HashMap Values =  roomDetails.getRoomDetails(room_id);	
+	if((request.getParameter("act")).equals("Save"))
+	{
+		HashMap results = new HashMap();
+		String room_floor_id = "";
+		
+		String[] facilityID = request.getParameterValues("room_floor_id");		
+		///Save the Medicine Record ///
+		for(int i=0;i<facilityID.length;i++)
+		{
+			room_floor_id += facilityID[i]+",";
+		}		
+		results.put("room_id",request.getParameter("room_id"));
+		results.put("room_user_id",request.getParameter("room_user_id"));
+		results.put("room_floor_id",request.getParameter("room_floor_id"));
+		results.put("room_name",request.getParameter("room_name"));
+		results.put("room_description",request.getParameter("room_description"));
+		
+		if((request.getParameter("room_id")).equals(""))
+		{
+			out.println(roomObj.saveRoom(results));
+			response.sendRedirect("../report-room.jsp?emp_id="+emp_id+"&msg=Room Saved Successfully");
+		}
+		else
+		{
+			results.put("room_id",request.getParameter("room_id"));
+			out.println(roomObj.updateRoom(results));
+			response.sendRedirect("../report-room.jsp?emp_id=0&msg=Room Updated Successfully");
+		}
+	}
 %>
-<div class="wrapper row3">
-  <div class="rounded">
-    <main class="container clear"> 
-      <!-- main body --> 
-      <div id="comments" style="width: 70%; float:left; margin-right:30px">
-      <h2>Room Entry Form</h2>
-        <form action="model/room.jsp" method="post">
-		  <div id="room_status_row">
-            <label for="email">Room Name<span>*</span></label>
-			<input type="text" name="room_name" id="room_name" value="<% out.print(Values.get("room_name")); %>" size="22" style="width:300px;" required>
-          </div>
-		  <div>
-            <label for="email">Select Floor<span>*</span></label>
-            <select style="height: 40px; width:300px" name = "room_floor_id" id = "room_floor_id" required>
-                
-            	<% out.print(roomDetails.getFloorOption((Integer) Values.get("room_floor_id"))); %>
-            </select>
-          </div>
-		  <div>
-            <label for="email">Select Supervisor<span>*</span></label>
-            <select style="height: 40px; width:300px" name = "room_user_id" id = "room_user_id" required>
-            	<% out.print(roomDetails.getUserOption((Integer) Values.get("room_user_id"))); %>
-            </select>
-          </div>
-		  <div>
-            <label for="email">Description<span>*</span></label>
-			<textarea style="width:300px; height:100px;" name="room_description" required><% out.print(Values.get("room_description")); %></textarea>
-          </div>
-          <div class="block clear"></div>
-          <div>
-            <input name="submit" type="submit" value="<% out.print(roomLabel); %> Room">
-            &nbsp;
-            <input name="reset" type="reset" value="Reset Form">
-          </div>
-		  <input type="hidden" name="act" value="Save" />
-		  <input type="hidden" name="room_id" value="<% out.print(Values.get("room_id")); %>"/>
-        </form>
-        </div>
-        <div style="float: left">
-        	<div><img src="images/save_1.jpg" style="width: 250px"></div><br>
-        	<div><img src="images/save_2.jpg" style="width: 250px"></div>
-        </div>
-      <div class="clear"></div>
-    </main>
-  </div>
-</div>
-<%@ include file="includes/footer.jsp" %>
